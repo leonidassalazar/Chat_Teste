@@ -15,7 +15,8 @@ A funcionalidade de mensagem privada, troca o usuario que enviou para a sala pri
 Os usuário são notificadas caso recebam mensagem em outras salas que esteja incluídos, mesmo que não esteja nela no momento, para vizualizar as mensagens de outra sala, o usuário deverá trocar para a sala em questão.
 Quando o ultimo usuario da sala sair, ela será deletada.
 
-Bug conhecido: se um usuario não entrou em uma sala cridada pelo envido de mensagem direta, ela não aparecerá na listagem das sala.
+##### Bug conhecido: se um usuario não entrou em uma sala cridada pelo envido de mensagem direta, ela não aparecerá na listagem das sala.
+##### Bug conhecido: no projeto Client, esta com um problema de concorrencia ao acesar e atualizar as salas de usuário, será necessário alterar o modo de notidicação de atualização das salas, como não tenho tempo para resolver, irei enviar o projeto assim mesmo.
 
 O projeto foi desenvolvido como uma Web API Core, tanto o Client quanto o Server.
 A porta da url do Client é gerada randomicamente ao iniciar a aplicação, existe a possibilidade de conflitos com outras aplicação, inclusive com outras instâncias do próprio Client, se isso ocorrer, reinicie uma das instâcias do Client;
