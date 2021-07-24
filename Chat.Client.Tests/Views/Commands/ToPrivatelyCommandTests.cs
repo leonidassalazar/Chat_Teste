@@ -22,7 +22,7 @@ namespace Chat.Client.Tests.Views.Commands
             mockHttp.When($"http://localost:5001/{endpoint}")
                 .Respond("application/json",
                     @"{" +
-                                "\"Name\": \"Marco-Juca\"," +
+                                "\"Name\": \"Juca-Marco\"," +
                                 "\"type\": 0" +
                             "}"
                     ); // Respond with JSON
@@ -52,7 +52,7 @@ namespace Chat.Client.Tests.Views.Commands
             ClientInfoStore.ServerRequest = new ServerRequest(hostUrl: ClientInfoStore.User.Address, client: new HttpClient());
             ClientInfoStore.User.AddRoom(new Room
             {
-                Name = "Marco-Juca",
+                Name = "Juca-Marco",
                 Type = RoomType.Private
             });
 
@@ -91,7 +91,7 @@ namespace Chat.Client.Tests.Views.Commands
             mockHttp.When($"http://localost:5001/{endpoint}")
                 .Respond("application/json",
                     @"{" +
-                                "\"Name\": \"Marco-Juca\"," +
+                                "\"Name\": \"Juca-Marco\"," +
                                 "\"type\": 0" +
                             "}"
                     ); // Respond with JSON
@@ -121,7 +121,7 @@ namespace Chat.Client.Tests.Views.Commands
             ClientInfoStore.ServerRequest = new ServerRequest(hostUrl: ClientInfoStore.User.Address, client: new HttpClient());
             ClientInfoStore.User.AddRoom(new Room
             {
-                Name = "Marco-Juca",
+                Name = "Juca-Marco",
                 Type = RoomType.Private
             });
 

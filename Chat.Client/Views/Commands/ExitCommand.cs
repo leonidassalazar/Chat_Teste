@@ -24,7 +24,7 @@ namespace Chat.Client.Views.Commands
         public string CommandDescription()
         {
             return @"/exit [room name]  -  Exit a room
-                     /exit              -  Close chat";
+exit              -  Close chat";
         }
     }
 }

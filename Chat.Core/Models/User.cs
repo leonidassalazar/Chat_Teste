@@ -10,12 +10,34 @@ namespace Chat.Core.Models
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public string Name { get; set; }
-        public string Address { get; set; }
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (value == _name) return;
+                _name = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string Address
+        {
+            get => _address;
+            set
+            {
+                if (value == _address) return;
+                _address = value;
+                OnPropertyChanged();
+            }
+        }
+
         [JsonIgnore]
         public ObservableCollection<Room> Rooms { get; }
 
         private readonly object _lockRooms;
+        private string _name;
+        private string _address;
 
         public User()
         {
@@ -28,17 +50,19 @@ namespace Chat.Core.Models
             lock (_lockRooms)
             {
                 Rooms.Add(room);
+                OnPropertyChanged("Rooms");
             }
         }
-        
+
         public void RemoveRoom(Room room)
         {
             lock (_lockRooms)
             {
                 Rooms.Remove(room);
+                OnPropertyChanged("Rooms");
             }
         }
-        
+
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

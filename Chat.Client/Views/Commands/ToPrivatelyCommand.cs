@@ -12,7 +12,12 @@ namespace Chat.Client.Views.Commands
             // TODO: Change the room to a private 
             if (!string.IsNullOrEmpty(complement))
             {
-                var roomName = $"{complement}-{ClientInfoStore.User.Name}";
+                var firstName =
+                    string.Compare(complement, ClientInfoStore.User.Name, StringComparison.InvariantCultureIgnoreCase) < 0
+                        ? complement
+                        : ClientInfoStore.User.Name;
+                var secondName = firstName == complement ? ClientInfoStore.User.Name : complement;
+                var roomName = $"{firstName}-{secondName}";
                 var newRoom =
                     ClientInfoStore.User.Rooms
                         .FirstOrDefault(q => string.Equals(q.Name, roomName,
@@ -31,6 +36,7 @@ namespace Chat.Client.Views.Commands
                     });
                     room.Users.Add(ClientInfoStore.User);
                     newRoom = ClientInfoStore.ServerRequest.CreatePrivateRoom(room);
+                    Console.WriteLine($"You change the room to #{newRoom.Name}"); ;
                 }
                 else
                 {

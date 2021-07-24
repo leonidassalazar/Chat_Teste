@@ -74,10 +74,10 @@ namespace Chat.Server.Controllers
         }
 
         [HttpGet]
-        public void ExitRoom(string roomName, string userName)
+        public bool ExitRoom(string roomName, string userName)
         {
-            if (roomName == null) return;
-            if (userName == null) return;
+            if (roomName == null) return false;
+            if (userName == null) return false;
 
             var room = ServerInfoStore.Rooms.FirstOrDefault(q =>
                 string.Equals(
@@ -94,12 +94,19 @@ namespace Chat.Server.Controllers
 
                 if (user == null)
                 {
-                    return;
+                    return false;
                 }
 
                 room.Users.Remove(user);
                 Console.WriteLine($"User {user.Name} has exited #{room.Name}");
+
+                if (room.Users.Count == 0)
+                {
+                    ServerInfoStore.Rooms.Remove(room);
+                }
             }
+
+            return true;
         }
 
         #endregion

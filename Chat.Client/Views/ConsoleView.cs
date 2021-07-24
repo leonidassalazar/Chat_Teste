@@ -14,6 +14,7 @@ namespace Chat.Client.Views
 {
     public class ConsoleView
     {
+        private Room _activeRoom;
         public void Start()
         {
             Console.WriteLine("*** Welcome to our chat server. Please provide a nickname.");
@@ -22,7 +23,7 @@ namespace Chat.Client.Views
             var newUser = new User();
             while (string.IsNullOrEmpty(value: userName))
             {
-                Console.Write("> ");
+                Console.Write(" ");
                 userName = Console.ReadLine();
                 try
                 {
@@ -73,10 +74,10 @@ namespace Chat.Client.Views
             {
                 try
                 {
-                    Console.Write("> ");
+                    Console.Write("   ");
                     var msg = Console.ReadLine();
                     TreatInput(msg);
-                    if(msg?.ToLower() == "/exit")
+                    if (msg?.ToLower() == "/exit")
                     {
                         return;
                     }
@@ -108,6 +109,7 @@ namespace Chat.Client.Views
             if (activeRoom == null) return;
 
             var unreadMessages = activeRoom.Messages.Where(m => m.Date > activeRoom.LastView).ToList();
+            activeRoom.LastView = DateTime.Now;
 
             foreach (var unreadMessage in unreadMessages)
             {
@@ -147,10 +149,6 @@ namespace Chat.Client.Views
         private void TreatInput(string input)
         {
 
-            var activeRoom = ClientInfoStore.User.Rooms.FirstOrDefault(q => q.State == StateEnum.Active);
-
-            if (activeRoom == null) return;
-
             if (string.IsNullOrEmpty(input))
             {
                 throw new ArgumentNullException(nameof(input));
@@ -182,12 +180,15 @@ namespace Chat.Client.Views
             }
 
             if (!sendMessage) return;
+
+            var activeRoom = ClientInfoStore.User.Rooms.FirstOrDefault(q => q.State == StateEnum.Active);
+
             if (!ClientInfoStore.ServerRequest.SendMessage(message, out var messageError, roomName: activeRoom.Name))
             {
                 Console.WriteLine($"Fail to send the message to server: {messageError}");
             }
         }
-        
+
         private Room EnterRoom(string roomName)
         {
             var room = ClientInfoStore.ServerRequest.EnterRoom(roomName: roomName);
@@ -198,6 +199,9 @@ namespace Chat.Client.Views
                 return null;
             }
 
+            room.MessageReceived -= RoomOnMessageReceived;
+            room.MessageReceived += RoomOnMessageReceived;
+
             return room;
         }
 
@@ -205,6 +209,17 @@ namespace Chat.Client.Views
         {
             if (e.PropertyName == nameof(ClientInfoStore.User.Rooms))
             {
+                var newActive = GetRoomActive();
+                if (newActive == null)
+                {
+                    _activeRoom = ClientInfoStore.User.Rooms.FirstOrDefault();
+                    Console.WriteLine($"Changed to #{_activeRoom.Name}");
+                }
+                else if (!ReferenceEquals(_activeRoom, newActive))
+                {
+                    _activeRoom = GetRoomActive();
+                    Console.WriteLine($"Changed to #{_activeRoom.Name}");
+                }
                 //Não tive tempo de melhorar de notificação de novas mensagens para novas salas,
                 //aí coloquei para atualizar os eventos de todas as salas
                 foreach (var userRoom in ClientInfoStore.User.Rooms)
@@ -222,5 +237,10 @@ namespace Chat.Client.Views
                 PrintUnreadMessages(room.Name);
             }
         }
+        private static Room GetRoomActive()
+        {
+            return ClientInfoStore.User.Rooms.FirstOrDefault(q => q.State == StateEnum.Active);
+        }
+
     }
 }

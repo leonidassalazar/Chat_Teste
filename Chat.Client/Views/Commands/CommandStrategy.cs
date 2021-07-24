@@ -16,7 +16,7 @@ namespace Chat.Client.Views.Commands
             CommandStrategies.Add("/p", new ToPrivatelyCommand());
             CommandStrategies.Add("/lr", new ListRoomsCommand());
             CommandStrategies.Add("/lu", new ListUsersCommand());
-            CommandStrategies.Add("/exist", new ExitCommand());
+            CommandStrategies.Add("/exit", new ExitCommand());
             CommandStrategies.Add("/ch", new ChangeRoomCommand());
             CommandStrategies.Add("/cr", new CreateRoomCommand());
             CommandStrategies.Add("/m", new MessageCommand());
