@@ -1,20 +1,23 @@
-﻿using Chat.Core.Models;
+﻿using Chat.Core.Enum;
+using Chat.Core.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using Chat.Core.Enum;
 
 namespace Chat.Client.BL
 {
     public class ServerRequest
     {
         private readonly string _hostUrl;
+        private readonly HttpClient _client;
 
-        public ServerRequest(string hostUrl)
+        public ServerRequest(string hostUrl, HttpClient client)
         {
             _hostUrl = hostUrl;
+
+            _client = client;
         }
 
         #region Private request methods
@@ -35,12 +38,8 @@ namespace Chat.Client.BL
             var c = new StringContent(serializedUser);
             c.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mediaType: "application/json");
 
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(uriString: ClientInfoStore.ServerUrl)
-            };
-
-            var result = client.PostAsync(requestUri: "api/ChatMessage/CreateUser", c).Result;
+            _client.DefaultRequestHeaders.Clear();
+            var result = _client.PostAsync(requestUri: "api/ChatMessage/CreateUser", c).Result;
 
             var tryParse = bool.TryParse(result.Content.ReadAsStringAsync().Result, out var success);
 
@@ -53,26 +52,20 @@ namespace Chat.Client.BL
             var c = new StringContent(serializedUser);
             c.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mediaType: "application/json");
 
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(uriString: ClientInfoStore.ServerUrl)
-            };
-
-            var result = client.PostAsync(requestUri: "api/ChatMessage/DeleteUser", c).Result;
+            _client.DefaultRequestHeaders.Clear();
+            var result = _client.PostAsync(requestUri: "api/ChatMessage/DeleteUser", c).Result;
 
             var tryParse = bool.TryParse(result.Content.ReadAsStringAsync().Result, out var success);
+
+            ClientInfoStore.User = null;
 
             return tryParse && success;
         }
 
         public List<string> GetRooms()
         {
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(uriString: ClientInfoStore.ServerUrl)
-            };
-
-            var result = client.GetAsync(requestUri: $"api/ChatMessage/GetRooms?userName={ClientInfoStore.User}").Result;
+            _client.DefaultRequestHeaders.Clear();
+            var result = _client.GetAsync(requestUri: $"api/ChatMessage/GetRooms?userName={ClientInfoStore.User}").Result;
 
             var rooms = JsonConvert.DeserializeObject<List<string>>(result.Content.ReadAsStringAsync().Result);
 
@@ -81,38 +74,84 @@ namespace Chat.Client.BL
 
         public List<string> GetUsers()
         {
-            var serializedUser = JsonConvert.SerializeObject(ClientInfoStore.User);
-            var c = new StringContent(serializedUser);
-            c.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mediaType: "application/json");
-
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(uriString: ClientInfoStore.ServerUrl)
-            };
-
-            var result = client.PostAsync(requestUri: "api/ChatMessage/GetUsers", c).Result;
+            _client.DefaultRequestHeaders.Clear();
+            var result = _client.GetAsync(requestUri: "api/ChatMessage/GetUsers").Result;
 
             var rooms = JsonConvert.DeserializeObject<List<string>>(result.Content.ReadAsStringAsync().Result);
 
             return rooms;
         }
 
+        public Room CreateRoom(Room room)
+        {
+            var serializedUser = JsonConvert.SerializeObject(room);
+            var c = new StringContent(serializedUser);
+
+            c.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mediaType: "application/json");
+
+            _client.DefaultRequestHeaders.Clear();
+            var result = _client.PostAsync($"api/ChatMessage/CreateRoom", c)
+                .Result;
+
+            var createdRoom = JsonConvert.DeserializeObject<Room>(result.Content.ReadAsStringAsync().Result);
+
+            if (createdRoom == null)
+            {
+                throw new ArgumentNullException($"The room name can't be null or empty.");
+            }
+
+            if (!ClientInfoStore.User.Rooms
+                .Any(q => string.Equals(q.Name, createdRoom.Name,
+                                            StringComparison.CurrentCultureIgnoreCase))
+            )
+            {
+                ClientInfoStore.User.AddRoom(createdRoom);
+            }
+            ActivateRoom(createdRoom);
+
+            return createdRoom;
+        }
+
+        public Room CreatePrivateRoom(Room room)
+        {
+            var serializedUser = JsonConvert.SerializeObject(room);
+            var c = new StringContent(serializedUser);
+
+            c.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mediaType: "application/json");
+
+            var result = _client.PostAsync($"api/ChatMessage/CreatePrivateRoom", c)
+                .Result;
+
+            var createdRoom = JsonConvert.DeserializeObject<Room>(result.Content.ReadAsStringAsync().Result);
+
+            if (createdRoom == null)
+            {
+                throw new ArgumentNullException($"The room name can't be null or empty.");
+            }
+
+            if (!ClientInfoStore.User.Rooms
+                .Any(q => string.Equals(q.Name, createdRoom.Name,
+                    StringComparison.CurrentCultureIgnoreCase))
+            )
+            {
+                ClientInfoStore.User.AddRoom(createdRoom);
+            }
+            ActivateRoom(createdRoom);
+
+            return createdRoom;
+        }
+
         public Room EnterRoom(string roomName)
         {
             var userName = ClientInfoStore.User.Name;
 
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(ClientInfoStore.ServerUrl)
-            };
-
-            var result = client.GetAsync($"api/ChatMessage/EnterRoom?roomName={roomName}&userName={userName}")
+            _client.DefaultRequestHeaders.Clear();
+            var result = _client.GetAsync($"api/ChatMessage/EnterRoom?roomName={roomName}&userName={userName}")
                 .Result;
 
             var room = JsonConvert.DeserializeObject<Room>(result.Content.ReadAsStringAsync().Result);
 
-            ClientInfoStore.User.Rooms.Add(room);
-            ActivateRoom(room);
+            ClientInfoStore.User.AddRoom(room);
 
             return room;
         }
@@ -133,19 +172,15 @@ namespace Chat.Client.BL
 
             var userName = ClientInfoStore.User.Name;
 
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(ClientInfoStore.ServerUrl)
-            };
-
-            var result = client.GetAsync($"api/ChatMessage/ExitRoom?roomName={roomName}&userName={userName}")
+            _client.DefaultRequestHeaders.Clear();
+            var result = _client.GetAsync($"api/ChatMessage/ExitRoom?roomName={roomName}&userName={userName}")
                 .Result;
 
             var tryParse = bool.TryParse(result.Content.ReadAsStringAsync().Result, out var success);
 
             if (tryParse && success)
             {
-                ClientInfoStore.User.Rooms.Remove(room);
+                ClientInfoStore.User.RemoveRoom(room);
 
                 if (room.State != StateEnum.Active) return true;
 
@@ -156,34 +191,25 @@ namespace Chat.Client.BL
             return tryParse && success;
         }
 
-        public bool ChangeRoom(string newRoom)
+        public void ChangeRoom(string newRoom)
         {
             var room = ClientInfoStore.User.Rooms.FirstOrDefault(q =>
-                string.Equals(q.Name, newRoom, StringComparison.CurrentCultureIgnoreCase));
-            if (room != null)
-            {
-                ActivateRoom(room);
-                return true;
-            }
-            return EnterRoom(newRoom) != null;
+                            string.Equals(q.Name, newRoom, StringComparison.CurrentCultureIgnoreCase)) ??
+                       EnterRoom(newRoom);
 
+            ActivateRoom(room);
         }
 
-        public bool SendMessage(Message message, out string messageError, string userDest = null, string roomName = null)
+        public bool SendMessage(Message message, out string messageError, string roomName = null)
         {
             messageError = null;
-            if (!string.IsNullOrEmpty(userDest))
-            {
-                message.UserDest = userDest;
-            }
+            message.UserSource = ClientInfoStore.User.Name;
 
             var c = new StringContent(JsonConvert.SerializeObject(message));
             c.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mediaType: "application/json");
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(uriString: ClientInfoStore.ServerUrl)
-            };
-            var result = client.PostAsync(requestUri: $"api/ChatMessage/PushMessages?roomName={roomName}", c)
+
+            _client.DefaultRequestHeaders.Clear();
+            var result = _client.PostAsync(requestUri: $"api/ChatMessage/PushMessages?roomName={roomName}", c)
                 .Result;
 
             if (!result.IsSuccessStatusCode)
@@ -216,5 +242,6 @@ namespace Chat.Client.BL
         }
 
         #endregion
+
     }
 }

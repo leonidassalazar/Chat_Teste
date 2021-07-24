@@ -28,8 +28,8 @@ namespace Chat.Server.Controllers
         {
             var localUser = GetUser(userName);
 
-            return ServerInfoStore.Rooms.Where(r => r.Type == RoomType.Public &&
-                                                    r.Users.Contains(localUser))
+            return ServerInfoStore.Rooms.Where(r => r.Type == RoomType.Public ||
+                                                    (r.Users.Contains(localUser) && r.Type == RoomType.Private))
                                         .Select(q => q.Name);
         }
 
@@ -60,9 +60,12 @@ namespace Chat.Server.Controllers
                     return null;
                 }
 
-                room.Users.Add(user);
+                if (!room.Users.Any(q => string.Equals(q.Name, userName, StringComparison.CurrentCultureIgnoreCase)))
+                {
+                    room.Users.Add(user);
+                }
 
-                NotifyNewUser(userName: user.Name, roomName: room.Name);
+                ServerInfoStore.ClientRequest.NotifyNewUser(userName: user.Name, roomName: room.Name);
 
                 return room;
             }
@@ -104,22 +107,44 @@ namespace Chat.Server.Controllers
         #region Post Methods
 
         [HttpPost]
-        public Room CreatePublicRoom(string roomName)
+        public Room CreateRoom(Room room)
         {
-            if (string.IsNullOrEmpty(roomName)) return null;
+            if (string.IsNullOrEmpty(room.Name)) return null;
 
-            if (!ExistsRoom(roomName: roomName))
+            var existentRoom = GetRoom(room.Name);
+            if (existentRoom != null) return existentRoom;
+            var newRoom = new Room(name: room.Name, type: RoomType.Public);
+            ServerInfoStore.Rooms.Add(newRoom);
+            return newRoom;
+
+        }
+
+        [HttpPost]
+        public Room CreatePrivateRoom(Room room)
+        {
+            if (string.IsNullOrEmpty(room.Name)) return null;
+
+            var existentRoom = GetRoom(room.Name);
+            if (existentRoom != null) return null;
+            var newRoom = new Room(name: room.Name, type: room.Type);
+
+            foreach (var user in room.Users)
             {
-                var room = new Room(name: roomName, type: RoomType.Public);
-                ServerInfoStore.Rooms.Add(room);
-                return room;
+                var localUser = GetUser(user.Name);
+                newRoom.Users.Add(localUser);
             }
+
+            ServerInfoStore.Rooms.Add(newRoom);
+            return newRoom;
+
         }
 
         [HttpPost]
         public bool CreateUser(User user)
         {
             if (user == null) return false;
+            if (string.IsNullOrEmpty(user.Name)) return false;
+            if (string.IsNullOrEmpty(user.Address)) return false;
             if (!ExistsUser(userName: user.Name))
             {
                 _ = NewUser(user: user);
@@ -134,15 +159,16 @@ namespace Chat.Server.Controllers
         public bool DeleteUser(User user)
         {
             if (user == null) return false;
+            if (string.IsNullOrEmpty(user.Name)) return false;
 
             var localUser = GetUser(user.Name);
 
             if (localUser != null)
             {
-                ServerInfoStore.Rooms.ForEach(r =>
+                foreach (var room in ServerInfoStore.Rooms)
                 {
-                    r.Users.Remove(localUser);
-                });
+                    room.Users.Remove(localUser);
+                }
 
                 ServerInfoStore.Users.Remove(localUser);
                 Console.WriteLine($"User {user.Name} was deleted");
@@ -154,38 +180,10 @@ namespace Chat.Server.Controllers
         public void PushMessages(string roomName, Message message)
         {
             if (message == null) return;
+            if (string.IsNullOrEmpty(message.Text)) return;
             if (string.IsNullOrEmpty(roomName)) return;
 
-            var room = ServerInfoStore.Rooms.FirstOrDefault(q => string.Equals(q.Name, roomName, StringComparison.InvariantCultureIgnoreCase))
-                       ?? new Room();
-
-            foreach (var user in room.Users.Where(q => !string.Equals(q.Name, message.UserSource, StringComparison.CurrentCultureIgnoreCase)))
-            {
-                try
-                {
-                    var client = new HttpClient
-                    {
-                        BaseAddress = new Uri(uriString: user.Address)
-                    };
-
-                    var json = JsonConvert.SerializeObject(value: message);
-                    var c = new StringContent(content: json);
-                    c.Headers.ContentType =
-                        new System.Net.Http.Headers.MediaTypeHeaderValue(mediaType: "application/json");
-
-                    var result = client.PostAsync(requestUri: $"api/Main/ReceiveMessage?roomName={roomName}", c).Result;
-
-                    Console.WriteLine(result.IsSuccessStatusCode
-                        ? $"Message from {user.Name} was sent: {result.StatusCode}"
-                        : $"Send message fail from {user.Name}: {result.StatusCode}");
-
-                    Console.WriteLine();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error on send message to #{room.Name}: {ex}");
-                }
-            }
+            ServerInfoStore.ClientRequest.PushMessages(roomName, message);
         }
 
         #endregion
@@ -194,7 +192,12 @@ namespace Chat.Server.Controllers
 
         private static bool ExistsRoom(string roomName)
         {
-            return ServerInfoStore.Rooms.Any(q =>
+            return GetRoom(roomName) != null;
+        }
+
+        private static Room GetRoom(string roomName)
+        {
+            return ServerInfoStore.Rooms.FirstOrDefault(q =>
                 string.Equals(
                     q.Name,
                     roomName,
@@ -223,43 +226,6 @@ namespace Chat.Server.Controllers
             return user;
         }
 
-        private static void NotifyNewUser(string roomName, string userName)
-        {
-            var msg = $"{userName} has joined #{roomName}";
-
-            var room = ServerInfoStore.Rooms.FirstOrDefault(q => string.Equals(q.Name, roomName, StringComparison.InvariantCultureIgnoreCase))
-                       ?? new Room();
-
-            foreach (var user in room.Users.Where(q => !string.Equals(q.Name, userName, StringComparison.CurrentCultureIgnoreCase)))
-            {
-                try
-                {
-                    var message = new Message { Text = msg };
-                    var c = new StringContent(content: JsonConvert.SerializeObject(value: message));
-                    c.Headers.ContentType =
-                        new System.Net.Http.Headers.MediaTypeHeaderValue(mediaType: "application/json");
-
-                    var client = new HttpClient
-                    {
-                        BaseAddress = new Uri(uriString: user.Address)
-                    };
-
-                    var result = client.PostAsync(requestUri: $"api/Main/NotifyNewUser", c).Result;
-
-                    Console.WriteLine(msg);
-
-                    Console.WriteLine(result.IsSuccessStatusCode
-                        ? $"Message from {user.Name} was sent: {result.StatusCode}"
-                        : $"Send message fail from {user.Name}: {result.StatusCode}");
-
-                    Console.WriteLine();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error on notify message to #{room.Name}: {ex}");
-                }
-            }
-        }
         #endregion
     }
 }

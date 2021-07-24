@@ -3,6 +3,9 @@ using Chat.Core.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
+using System.Net.Http;
+using Chat.Server.BL;
+using Microsoft.AspNetCore.Http.Connections;
 
 namespace Chat.Server
 {
@@ -10,8 +13,10 @@ namespace Chat.Server
     {
         public static void Main(string[] args)
         {
-            ServerInfoStore.Rooms = new List<Room>();
-            ServerInfoStore.Users = new List<User>();
+            ServerInfoStore.Rooms = new SynchronizedCollection<Room>();
+            ServerInfoStore.Users = new SynchronizedCollection<User>();
+
+            ServerInfoStore.ClientRequest = new ClientRequest(new HttpClientHandler());
 
             var generalRoom = new Room("general", RoomType.Public);
             ServerInfoStore.Rooms.Add(generalRoom);

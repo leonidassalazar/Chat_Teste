@@ -1,9 +1,10 @@
 using Chat.Client.BL;
+using Chat.Client.Views;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Linq;
-using Chat.Client.Views;
+using System.Net.Http;
 
 namespace Chat.Client
 {
@@ -14,13 +15,17 @@ namespace Chat.Client
         public static void Main(string[] args)
         {
             ClientInfoStore.ServerUrl = "https://localhost:5001";
+            var client = new HttpClient
+            {
+                BaseAddress = new Uri(ClientInfoStore.ServerUrl)
+            };
 
-            var host= CreateHostBuilder(args).UseConsoleLifetime();
-            var serverRequest = new ServerRequest(hostUrl:_applicationUrl);
-            ClientInfoStore.ConsoleView = new ConsoleView(serverRequest);
+            var host = CreateHostBuilder(args).UseConsoleLifetime();
+
+            ClientInfoStore.ServerRequest = new ServerRequest(hostUrl: _applicationUrl, client: client);
 
             host.Build().RunAsync();
-            ClientInfoStore.ConsoleView.Start();
+            new ConsoleView().Start();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

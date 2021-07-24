@@ -8,6 +8,6 @@ namespace Chat.Client
     {
         public static User User { get; set; }
         public static string ServerUrl { get; set; }
-        public static ConsoleView ConsoleView { get; set; }
+        public static ServerRequest ServerRequest { get; set; }
     }
 }
