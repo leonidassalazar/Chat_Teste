@@ -1,6 +1,6 @@
 ﻿using Chat.Core.Models;
-using System.Collections.Generic;
 using Chat.Server.BL;
+using System.Collections.Generic;
 
 namespace Chat.Server
 {

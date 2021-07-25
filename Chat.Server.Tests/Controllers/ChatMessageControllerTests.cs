@@ -658,10 +658,10 @@ namespace Chat.Server.Tests.Controllers
         {
             var roomNumber = 0;
             var roomName = ServerInfoStore.Rooms[roomNumber].Name;
-            
+
             // Arrange
             var request = $"api/ChatMessage/PushMessages?roomName={roomName}";
-            
+
             var c = new StringContent(content: "{\"message\":null}");
             c.Headers.ContentType =
                     new System.Net.Http.Headers.MediaTypeHeaderValue(mediaType: "application/json");

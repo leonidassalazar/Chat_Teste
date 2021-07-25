@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
-using Chat.Core.Enum;
+﻿using Chat.Core.Enum;
 using Chat.Core.Models;
+using System;
+using System.Linq;
 
 namespace Chat.Client.Views.Commands
 {

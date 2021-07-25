@@ -1,5 +1,5 @@
-﻿using System;
-using Chat.Core.Models;
+﻿using Chat.Core.Models;
+using System;
 
 namespace Chat.Client.Views.Commands
 {

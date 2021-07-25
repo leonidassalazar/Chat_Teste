@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Chat.Client.Tests.Views
+﻿namespace Chat.Client.Tests.Views
 {
     public class ConsoleViewTests
     {

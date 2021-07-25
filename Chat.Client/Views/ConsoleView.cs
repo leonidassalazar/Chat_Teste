@@ -1,14 +1,12 @@
-﻿using Chat.Client.BL;
+﻿using Chat.Client.Views.Commands;
 using Chat.Core.Enum;
 using Chat.Core.Models;
 using Chat.Core.Utils;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Chat.Client.Views.Commands;
 
 namespace Chat.Client.Views
 {

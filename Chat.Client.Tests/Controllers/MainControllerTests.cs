@@ -6,6 +6,7 @@ using RichardSzalay.MockHttp;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Chat.Client.Tests.Views.Commands;
 using Xunit;
 
 namespace Chat.Client.Tests.Controllers
@@ -34,7 +35,7 @@ namespace Chat.Client.Tests.Controllers
             ClientInfoStore.User.AddRoom(room);
         }
 
-        [Fact]
+        [Fact][BaseClassTests]
         public async Task TestReceiveMessageSuccess()
         {
             // Arrange
@@ -57,7 +58,7 @@ namespace Chat.Client.Tests.Controllers
             response.EnsureSuccessStatusCode();
         }
 
-        [Fact]
+        [Fact][BaseClassTests]
         public async Task TestReceiveMessageNotJoinedRoom()
         {
             const string roomName = "banana";
@@ -99,7 +100,7 @@ namespace Chat.Client.Tests.Controllers
             response.EnsureSuccessStatusCode();
         }
 
-        [Fact]
+        [Fact][BaseClassTests]
         public async Task TestNewUserNotification()
         {
             // Arrange

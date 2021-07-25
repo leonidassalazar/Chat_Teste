@@ -1,4 +1,5 @@
-﻿using Chat.Core.Enum;
+﻿using Chat.Core.Annotations;
+using Chat.Core.Enum;
 using Chat.Core.Models;
 using Newtonsoft.Json;
 using System;
@@ -224,7 +225,7 @@ namespace Chat.Client.BL
 
         #region Private methods
 
-        private static void ActivateRoom(Room activeRoom)
+        private static void ActivateRoom([NotNull] Room activeRoom)
         {
             var lastRoom = ClientInfoStore.User.Rooms.FirstOrDefault(q => q.State == StateEnum.Active);
             if (lastRoom != null)

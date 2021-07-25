@@ -1,18 +1,16 @@
-﻿using Chat.Client.BL;
-using Chat.Client.Views.Commands;
-using Chat.Core.Enum;
+﻿using Chat.Client.Views.Commands;
 using Chat.Core.Models;
-using RichardSzalay.MockHttp;
 using System;
-using System.Net.Http;
 using Xunit;
 using Assert = Xunit.Assert;
 
 namespace Chat.Client.Tests.Views.Commands
 {
+    [Collection("Group 1")]
     public class ToCommandTests : BaseClassTests
     {
         [Fact]
+        [BaseClassTests]
         public void ExecuteTest()
         {
             var toCommand = new ToCommand();
@@ -27,6 +25,7 @@ namespace Chat.Client.Tests.Views.Commands
         }
 
         [Fact]
+        [BaseClassTests]
         public void ExecuteTestNullComplement()
         {
             var toCommand = new ToCommand();
@@ -40,6 +39,7 @@ namespace Chat.Client.Tests.Views.Commands
         }
 
         [Fact]
+        [BaseClassTests]
         public void ExecuteTestNullMessage()
         {
             var toCommand = new ToCommand();

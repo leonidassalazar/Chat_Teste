@@ -1,5 +1,5 @@
 ﻿using Chat.Core.Annotations;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
@@ -33,7 +33,7 @@ namespace Chat.Core.Models
         }
 
         [JsonIgnore]
-        public ObservableCollection<Room> Rooms { get; }
+        public SynchronizedCollection<Room> Rooms { get; }
 
         private readonly object _lockRooms;
         private string _name;
@@ -42,7 +42,7 @@ namespace Chat.Core.Models
         public User()
         {
             _lockRooms = new object();
-            Rooms = new ObservableCollection<Room>();
+            Rooms = new SynchronizedCollection<Room>();
         }
 
         public void AddRoom(Room room)

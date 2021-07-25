@@ -26,7 +26,7 @@ namespace Chat.Client.Controllers
             if (room == null)
             {
                 room = ClientInfoStore.ServerRequest.EnterRoom(roomName);
-                if(room == null) return;
+                if (room == null) return;
             }
 
             room.AddMessage(message);

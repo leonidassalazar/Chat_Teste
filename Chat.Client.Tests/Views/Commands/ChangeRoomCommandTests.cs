@@ -10,9 +10,11 @@ using Assert = Xunit.Assert;
 
 namespace Chat.Client.Tests.Views.Commands
 {
+    [Collection("Group 1")]
     public class ChangeRoomCommandTests : BaseClassTests
     {
         [Fact]
+        [BaseClassTests]
         public void ExecuteTest()
         {
             const string roomName = "banana";
@@ -47,6 +49,7 @@ namespace Chat.Client.Tests.Views.Commands
         }
 
         [Fact]
+        [BaseClassTests]
         public void ExecuteTestNullComplement()
         {
             const string roomName = "banana";
@@ -69,17 +72,18 @@ namespace Chat.Client.Tests.Views.Commands
             ClientInfoStore.ServerRequest = new ServerRequest(hostUrl: ClientInfoStore.User.Address, client: serverClient);
 
             var changeRoomCommand = new ChangeRoomCommand();
-            
+
             var message = new Message();
 
             var result = changeRoomCommand.Execute(null, ref message, null);
 
             Assert.False(result);
-            Assert.Equal(StateEnum.Active, ClientInfoStore.User.Rooms[0].State);
-            Assert.Equal(StateEnum.Deactivated, ClientInfoStore.User.Rooms[1].State);
+            Assert.Equal(StateEnum.Deactivated, ClientInfoStore.User.Rooms[0].State);
+            Assert.Equal(StateEnum.Active, ClientInfoStore.User.Rooms[1].State);
         }
 
         [Fact]
+        [BaseClassTests]
         public void ExecuteTestNullMessage()
         {
             const string roomName = "banana";

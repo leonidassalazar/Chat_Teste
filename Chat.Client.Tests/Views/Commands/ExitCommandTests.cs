@@ -10,9 +10,11 @@ using Assert = Xunit.Assert;
 
 namespace Chat.Client.Tests.Views.Commands
 {
+    [Collection("Group 1")]
     public class ExitCommandTests : BaseClassTests
     {
         [Fact]
+        [BaseClassTests]
         public void ExecuteTest()
         {
             var mockHttp = new MockHttpMessageHandler();
@@ -41,6 +43,7 @@ namespace Chat.Client.Tests.Views.Commands
         }
 
         [Fact]
+        [BaseClassTests]
         public void ExecuteTestNullComplement()
         {
             var mockHttp = new MockHttpMessageHandler();
@@ -65,6 +68,7 @@ namespace Chat.Client.Tests.Views.Commands
             Assert.Null(ClientInfoStore.User);
         }
         [Fact]
+        [BaseClassTests]
         public void ExecuteTestNullMessage()
         {
             var mockHttp = new MockHttpMessageHandler();
@@ -93,6 +97,7 @@ namespace Chat.Client.Tests.Views.Commands
         }
 
         [Fact]
+        [BaseClassTests]
         public void ExecuteTestNullComplementNullMessage()
         {
             var mockHttp = new MockHttpMessageHandler();
@@ -116,6 +121,6 @@ namespace Chat.Client.Tests.Views.Commands
             Assert.False(result);
             Assert.Null(ClientInfoStore.User);
         }
-        
+
     }
 }

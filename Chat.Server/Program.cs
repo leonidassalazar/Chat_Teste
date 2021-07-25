@@ -1,11 +1,10 @@
 using Chat.Core.Enum;
 using Chat.Core.Models;
+using Chat.Server.BL;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
 using System.Net.Http;
-using Chat.Server.BL;
-using Microsoft.AspNetCore.Http.Connections;
 
 namespace Chat.Server
 {

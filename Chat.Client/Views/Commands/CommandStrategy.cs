@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Chat.Core.Models;
+﻿using System.Collections.Generic;
 
 namespace Chat.Client.Views.Commands
 {
@@ -22,7 +18,7 @@ namespace Chat.Client.Views.Commands
             CommandStrategies.Add("/m", new MessageCommand());
             CommandStrategies.Add("/h", new HelpCommand());
         }
-        
+
         public static ICommand GetCommand(string command)
         {
             return CommandStrategies[command];

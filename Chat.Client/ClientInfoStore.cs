@@ -1,5 +1,4 @@
 ﻿using Chat.Client.BL;
-using Chat.Client.Views;
 using Chat.Core.Models;
 
 namespace Chat.Client

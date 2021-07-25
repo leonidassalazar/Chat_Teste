@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Chat.Core.Models;
+using System;
 using System.Collections.Generic;
-using Chat.Core.Models;
 
 namespace Chat.Client.Views.Commands
 {

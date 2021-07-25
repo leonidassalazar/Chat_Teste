@@ -1,11 +1,13 @@
 ﻿using Chat.Core.Enum;
 using Chat.Core.Models;
+using System.Reflection;
+using Xunit.Sdk;
 
 namespace Chat.Client.Tests.Views.Commands
 {
-    public class BaseClassTests
+    public class BaseClassTests : BeforeAfterTestAttribute
     {
-        public BaseClassTests()
+        public override void Before(MethodInfo methodUnderTest)
         {
             var room = new Room
             {

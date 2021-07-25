@@ -10,9 +10,12 @@ using Assert = Xunit.Assert;
 
 namespace Chat.Client.Tests.Views.Commands
 {
+    [Collection("Group 1")]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class ToPrivatelyCommandTests : BaseClassTests
     {
         [Fact]
+        [BaseClassTests]
         public void ExecuteTestNotExistRoom()
         {
             var endpoint = $"api/ChatMessage/CreatePrivateRoom";
@@ -47,6 +50,7 @@ namespace Chat.Client.Tests.Views.Commands
         }
 
         [Fact]
+        [BaseClassTests]
         public void ExecuteTestExistRoom()
         {
             ClientInfoStore.ServerRequest = new ServerRequest(hostUrl: ClientInfoStore.User.Address, client: new HttpClient());
@@ -70,6 +74,7 @@ namespace Chat.Client.Tests.Views.Commands
         }
 
         [Fact]
+        [BaseClassTests]
         public void ExecuteTestNullComplement()
         {
             var toPrivatelyCommand = new ToPrivatelyCommand();
@@ -82,6 +87,7 @@ namespace Chat.Client.Tests.Views.Commands
         }
 
         [Fact]
+        [BaseClassTests]
         public void ExecuteTestNotExistRoomNullMessage()
         {
             var endpoint = $"api/ChatMessage/CreatePrivateRoom";
@@ -116,6 +122,7 @@ namespace Chat.Client.Tests.Views.Commands
         }
 
         [Fact]
+        [BaseClassTests]
         public void ExecuteTestExistRoomNullMessage()
         {
             ClientInfoStore.ServerRequest = new ServerRequest(hostUrl: ClientInfoStore.User.Address, client: new HttpClient());
