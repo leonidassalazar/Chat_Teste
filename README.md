@@ -37,3 +37,9 @@ Apontei a maioria das coisas que queria aqui, apesar de parecer que dei foco nos
 ### Os software foram feitos somente para rodar em ambiente local.
 #### - Não foi implementado nenhum tipo de mecanismo para seguraça das mensagens
 #### - Não foi implementado nenhum metodo de persistencia das informações, todos os dados são salvi em memória.
+
+## Rodar
+
+Os projetos foram escritos em .NET Core 5, então é necessário que tenha o SDK dessa versão instalado para realização do build dos projetos no Visual Studio.
+Após os builds, basta ir nas pastas bin dos projetos e iniciá-los, comece pelo servidor (../Chat.Server/bin/net5.0) e depois abra quantas instâncias quiser do cliente (../Chat.Client/bin/net5.0). Lembrando que não foram realizados testes com no maximo três instâncias do cliente. 
+Ao iniciar uma instância do cliente será necessário escolher um nome, e após isso, já é possível trocar mensagens com os outros clientes.
